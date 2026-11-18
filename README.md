@@ -2,7 +2,7 @@
 
 Public XP/hour records, level-based EHP, and time-to-max estimates for rs2b2t.
 
-**Website: https://kennybossier.github.io/rs2b2t-skill-lab/**
+**Website: https://kennybossier.github.io/rs2b2t-skill-lab-v2/**
 
 This is an independent GitHub Pages project. It has no dependency on a local
 dashboard, bot client, database, computer, private API or user credentials.
@@ -16,7 +16,7 @@ Only public rs2b2t character statistics and training-rate definitions are includ
   [2004Tracker's rate file](https://github.com/R-Dson/2004Tracker/blob/main/data/skill_rates.json).
 - Skill cards show each skill's five best observed one-hour player records,
   distinct from the rates used for calculations.
-- The initial seed includes 31,564 checked historical player-days across 954
+- The initial seed includes 38,704 checked historical player-days across 970
   skill/player pairs, covering the top 40 overall total-level players in all
   skills, plus per-skill contenders. Hour records are sampled, not exhaustive.
 - GitHub Actions updates character snapshots every six hours, expands the
@@ -74,3 +74,13 @@ the next run will resume from that baseline.
 
 Public source data: https://rs2b2t.com/progress. This project is unofficial and
 is not affiliated with rs2b2t or the authors of 2004Tracker.
+
+## V2 historical leaderboards
+
+V2 is independent of the original Skill Lab. Each leaderboard has a 30-day chart of daily top-ten players, using completed UTC dates. Lines break when players leave the top ten. Legends toggle players, and chart points support hover and keyboard focus. The date slider lists each day’s values and ranks.
+
+Historical hours use current configured EHP rates across recorded daily XP. Point history ranks each contender’s best known hour before each day ends, including pre-month records. Missing daily XP is never filled from future values. Missing hourly source history is reported, not fabricated. Partial backfill results can change as more records are recovered.
+
+Use the Publish skill lab V2 workflow with Backfill enabled to resume a 12-minute, throttled batch. Raw XP, dated hour records and checkpoints are compressed in archive.json.gz on the history branch; the main branch remains source-only. Publishing a source change restores this archive and recalculates the static data/history.json without scraping. Cache eviction does not erase history. V2 schedules are staggered to minute 47 every six hours, with one V2 job at a time.
+
+The initial seed reuses 38,704 checked player-days and 970 contender pairs. Backfill began with 500 additional public requests; roughly 25,000 unprocessed daily/history requests remained at publication. Counts increase as new dates and players are added. Hourly history that the source no longer retains cannot be reconstructed exactly.

@@ -16,3 +16,9 @@ for(const range of manifest.ranges){
 const alltime=await Bun.file('dist/data/alltime.json').json();
 assert.ok(alltime.scannedDays>=31564);assert.equal(alltime.boards.length,19);
 console.log(JSON.stringify({verified:true,characters:manifest.characters.length,ranges:manifest.ranges,scanDays:alltime.scannedDays}));
+const history=await Bun.file('dist/data/history.json').json();
+assert.equal(history.version,1);assert.equal(history.days.length,30);
+assert.ok(history.coverage.dailyTotal>0);assert.ok(history.coverage.hourlyTotal>0);
+assert.ok(history.days.some((d:any)=>d.closest.length>0));
+assert.ok(history.days.every((d:any)=>d.closest.length<=10&&d.points.length<=10));
+assert.ok(html.includes('max-history'));assert.ok(html.includes('points-history'));

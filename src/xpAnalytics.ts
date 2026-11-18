@@ -115,7 +115,7 @@ export function historicalDays(points:XpPoint[]):string[] {
 const cache = new Map<string,{time:number;html:string}>();
 const pending = new Map<string,Promise<string>>();
 let queue: Promise<unknown> = Promise.resolve();
-async function source(path: string): Promise<string> {
+export async function source(path: string): Promise<string> {
     const saved=cache.get(path); if(saved && Date.now()-saved.time < 15*60000)return saved.html;
     if(pending.has(path))return pending.get(path)!;
     // Serialize requests and leave a gap, so a local dashboard cannot hammer the public site.

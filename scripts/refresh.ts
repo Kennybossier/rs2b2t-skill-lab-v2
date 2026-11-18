@@ -12,12 +12,12 @@ const today=new Date().toISOString().slice(0,10);
 let extended=false;
 for(const player of history.players){
  if(!player.days?.length)continue;
- const last=player.days.at(-1);
+ const last=[...player.days].sort().at(-1);
  for(let time=Date.parse(last+'T00:00:00Z')+86400000;time<=Date.parse(today+'T00:00:00Z');time+=86400000){
   player.days.push(new Date(time).toISOString().slice(0,10));extended=true;
  }
  // Today's chart can gain XP between scheduled runs; check it again each run.
- if(player.days.at(-1)===today&&player.next>=player.days.length){player.next=player.days.length-1;extended=true;}
+ if(player.next>=player.days.length&&player.days.includes(today)){player.days=player.days.filter((day:string)=>day!==today).concat(today);player.next=player.days.length-1;extended=true;}
 }
 if(extended){history.complete=false;history.running=false;await writeFile(historyFile,JSON.stringify(history));}
 const {handleXpRoute,parseBoard,character}=await import('../src/xpAnalytics');

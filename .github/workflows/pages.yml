@@ -1,24 +1,28 @@
-name: Publish skill lab
+name: Publish skill lab V2
 on:
   push:
     branches: [main]
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '47 */6 * * *'
   workflow_dispatch:
     inputs:
       refresh:
         description: Refresh public player data before publishing
         type: boolean
         default: true
+      backfill:
+        description: Resume historical leaderboard backfill
+        type: boolean
+        default: true
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
 concurrency:
-  group: skill-lab-pages
-  cancel-in-progress: ${{ github.event_name == 'push' }}
+  group: skill-lab-v2-pages
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -41,12 +45,22 @@ jobs:
           path: state
           key: public-xp-${{ github.run_id }}
           restore-keys: public-xp-
+      - name: Restore durable leaderboard history
+        run: bun run scripts/history-store.ts restore
+      - name: Resume bounded historical backfill
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.backfill)
+        env:
+          HISTORY_MINUTES: '12'
+        run: bun run scripts/backfill-history.ts
       - name: Refresh player snapshots and resume historical scan
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.refresh)
         run: bun run refresh
       - name: Fill missing lifetime playtime
         run: bun run scripts/backfill-playtime.ts
       - run: bun run build
+      - name: Save durable leaderboard history
+        if: always()
+        run: bun run scripts/history-store.ts save
       - name: Save collected public data
         uses: actions/cache/save@v4
         with:

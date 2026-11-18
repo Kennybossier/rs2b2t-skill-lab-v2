@@ -6,6 +6,8 @@ for(const file of ['xp-analytics-cache.json','xp-alltime-records.json']){
 }
 process.env.DASHBOARD_DATA_DIR=state;
 const {handleXpRoute}=await import('../src/xpAnalytics');
+const {loadHistory,saveHistory}=await import('./history-state');
+const {buildHistory}=await import('../src/leaderboardHistory');
 const {trackerEstimate,RATE_SOURCE}=await import('../src/xpRates');
 await mkdir('dist/data',{recursive:true});
 for(const file of await readdir('public'))await copyFile(join('public',file),join('dist',file));
@@ -37,5 +39,7 @@ await output('hours.json',Object.fromEntries(scan.players.map((p:any)=>[`${p.slu
 let warning='';try{warning=JSON.parse(await readFile(join(state,'refresh-status.json'),'utf8')).warning??'';}catch{}
 const manifest={version:1,builtAt:Date.now(),ranges:ranges.sort((a,b)=>Number(a)-Number(b)),characters:[...roster.values()].sort((a,b)=>a.name.localeCompare(b.name)),warning,
  source:'https://rs2b2t.com/progress',rateSource:RATE_SOURCE,scanDays:alltime.scannedDays};
+const history=await loadHistory();await saveHistory(history);
+await output('history.json',buildHistory(history));
 await output('manifest.json',manifest);await writeFile('dist/.nojekyll','');
 console.log(JSON.stringify({ranges:manifest.ranges,characters:roster.size,scanDays:alltime.scannedDays,output:resolve('dist')}));
