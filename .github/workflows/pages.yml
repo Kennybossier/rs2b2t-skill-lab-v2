@@ -46,6 +46,7 @@ jobs:
           key: public-xp-${{ github.run_id }}
           restore-keys: public-xp-
       - name: Restore durable leaderboard history
+        id: history-restore
         run: bun run scripts/history-store.ts restore
       - name: Resume bounded historical backfill
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.backfill)
@@ -56,10 +57,11 @@ jobs:
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.refresh)
         run: bun run refresh
       - name: Fill missing lifetime playtime
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.refresh)
         run: bun run scripts/backfill-playtime.ts
       - run: bun run build
       - name: Save durable leaderboard history
-        if: always()
+        if: always() && steps.history-restore.outcome == 'success'
         run: bun run scripts/history-store.ts save
       - name: Save collected public data
         uses: actions/cache/save@v4
